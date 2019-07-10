@@ -230,3 +230,6 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
+/.vs/CodeKataCSharp/v16/Server/sqlite3
+/.vs/ProjectSettings.json
+/.vs/slnx.sqlite

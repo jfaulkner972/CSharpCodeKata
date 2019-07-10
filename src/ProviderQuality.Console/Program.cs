@@ -18,98 +18,83 @@ namespace ProviderQuality.Console
             {
                 Awards = new List<Award>
                 {
-                    new Award {Name = "Gov Quality Plus", SellIn = 10, Quality = 20},
-                    new Award {Name = "Blue First", SellIn = 2, Quality = 0},
-                    new Award {Name = "ACME Partner Facility", SellIn = 5, Quality = 7},
-                    new Award {Name = "Blue Distinction Plus", SellIn = 0, Quality = 80},
-                    new Award {Name = "Blue Compare", SellIn = 15, Quality = 20},
-                    new Award {Name = "Top Connected Providres", SellIn = 3, Quality = 6}
+                    new Award {Name = "Gov Quality Plus", ExpiresIn = 10, Quality = 20},
+                    new Award {Name = "Blue First", ExpiresIn = 2, Quality = 0},
+                    new Award {Name = "ACME Partner Facility", ExpiresIn = 5, Quality = 7},
+                    new Award {Name = "Blue Distinction Plus", ExpiresIn = 0, Quality = 80},
+                    new Award {Name = "Blue Compare", ExpiresIn = 15, Quality = 20},
+                    new Award {Name = "Top Connected Providres", ExpiresIn = 3, Quality = 6},
+                    new Award {Name = "Blue Star", ExpiresIn = 3, Quality = 6}
                 }
 
             };
 
             app.UpdateQuality();
 
+            System.Console.Write("Award metrics have been updated. Press any key to continue.");
             System.Console.ReadKey();
-
         }
 
         public void UpdateQuality()
         {
-            for (var i = 0; i < Awards.Count; i++)
+            foreach (Award award in Awards)
             {
-                if (Awards[i].Name != "Blue First" && Awards[i].Name != "Blue Compare")
+                switch (award.Name)
                 {
-                    if (Awards[i].Quality > 0)
-                    {
-                        if (Awards[i].Name != "Blue Distinction Plus")
+                    case "Blue First":
+                        award.DecreaseExpirationDate();
+                        if (award.Quality < 50 && award.Quality > 0)
                         {
-                            Awards[i].Quality = Awards[i].Quality - 1;
+                            award.Quality++;
                         }
-                    }
-                }
-                else
-                {
-                    if (Awards[i].Quality < 50)
-                    {
-                        Awards[i].Quality = Awards[i].Quality + 1;
-
-                        if (Awards[i].Name == "Blue Compare")
+                        else if (award.Quality >= 50)
                         {
-                            if (Awards[i].SellIn < 11)
-                            {
-                                if (Awards[i].Quality < 50)
-                                {
-                                    Awards[i].Quality = Awards[i].Quality + 1;
-                                }
-                            }
-
-                            if (Awards[i].SellIn < 6)
-                            {
-                                if (Awards[i].Quality < 50)
-                                {
-                                    Awards[i].Quality = Awards[i].Quality + 1;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (Awards[i].Name != "Blue Distinction Plus")
-                {
-                    Awards[i].SellIn = Awards[i].SellIn - 1;
-                }
-
-                if (Awards[i].SellIn < 0)
-                {
-                    if (Awards[i].Name != "Blue First")
-                    {
-                        if (Awards[i].Name != "Blue Compare")
-                        {
-                            if (Awards[i].Quality > 0)
-                            {
-                                if (Awards[i].Name != "Blue Distinction Plus")
-                                {
-                                    Awards[i].Quality = Awards[i].Quality - 1;
-                                }
-                            }
+                            award.Quality = 50;
                         }
                         else
                         {
-                            Awards[i].Quality = Awards[i].Quality - Awards[i].Quality;
+                            award.Quality = 0;
+                            award.Quality++;
                         }
-                    }
-                    else
-                    {
-                        if (Awards[i].Quality < 50)
+                        break;
+                    //Instructions indicate that Blue Distinction Plus awards are unaffected by quality decay but 
+                    //does not mention that Blue Distinction Plus awards do not expire. Legacy code indicates that expiration date is irrelevant 
+                    //in regards to Blue Distinction Plus awards. Blue Distinction Plus awards will decrease their expiration date each day for consistency
+                    // Jason Faulkner - 7/9/19
+                    case "Blue Distinction Plus":
+                        award.DecreaseExpirationDate();
+                        break;
+                    case "Blue Compare":
+                        award.DecreaseExpirationDate();
+                        if (award.ExpiresIn > 10)
                         {
-                            Awards[i].Quality = Awards[i].Quality + 1;
+                            award.ChangeQuality(1);
                         }
-                    }
+                        else if (award.ExpiresIn <= 10 && award.ExpiresIn > 5)
+                        {
+                            award.ChangeQuality(2);
+                        }
+                        else if (award.ExpiresIn < 5 && award.ExpiresIn > 0)
+                        {
+                            award.ChangeQuality(3);
+                        }
+                        else
+                        {
+                            award.Quality = 0;
+                        }
+                        break;
+                    case "Blue Star":
+                        award.DecreaseExpirationDate();
+                        award.ChangeQuality(-2);
+                        break;
+                    default:
+                        award.DecreaseExpirationDate();
+                        award.ChangeQuality(-1);
+                        break;
+
                 }
             }
         }
-
     }
 
 }
